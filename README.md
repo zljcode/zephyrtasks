@@ -1,3 +1,5 @@
+<img src="resources/logo.png" width="48" align="left" style="margin-right:12px">
+
 # 小猪桌面代办助手
 
 极简风格悬浮桌面待办列表小组件，暖白半透明质感，高保真 UI 设计。无标题栏、菜单栏、状态栏，通过悬浮窗和快捷交互完成待办管理。
