@@ -7,7 +7,7 @@
   <img src="resources/show2.png" width="280" alt="截图2" style="vertical-align: top;">
 </div>
 
-## 运行方式
+## 🚀 运行方式
 
 ### 方式一：直接运行（推荐）
 
@@ -26,7 +26,7 @@ python main.py
 
 按 `Ctrl+C` 可在终端退出。
 
-## 功能说明
+## 📋 功能说明
 
 | 操作 | 行为 |
 |------|------|
@@ -44,7 +44,7 @@ python main.py
 | 将窗口拖离边缘 | 保持常显 |
 | 右上角 × | 关闭应用 |
 
-## UI 特性
+## 🎨 UI 特性
 
 - 暖白半透明背景（#f8f5f1），圆角 10px，柔和阴影
 - 字体：幼圆优先，加粗，可爱圆润风格
@@ -55,12 +55,12 @@ python main.py
 - 窗口支持边框拖拽缩放，字体按比例自适应
 - 关闭再打开恢复默认大小（280×380），位置持久化
 
-## 数据存储
+## 💾 数据存储
 
 - 数据目录：`C:\Users\<用户名>\.ZephyrTasks\`
   - `tasks.db` — 任务数据（SQLite，含创建/完成时间）
   - `config.json` — 窗口位置
 
-## 自行打包
+## 📦 自行打包
 
 详见 [PACKAGING.md](PACKAGING.md)。
