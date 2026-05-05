@@ -6,7 +6,7 @@
 
 ### 方式一：直接运行（推荐）
 
-下载 `dist/小猪桌面代办助手.exe`，双击即可运行，无需安装 Python 或任何依赖。
+前往 [Releases](https://github.com/zljcode/ZephyrTasks/releases) 页面下载最新版 `小猪桌面代办助手.exe`，双击即可运行，无需安装 Python 或任何依赖。
 
 ### 方式二：从源码运行
 
