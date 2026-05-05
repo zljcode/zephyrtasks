@@ -11,16 +11,16 @@
 
 ### 方式一：直接运行（推荐）
 
-前往 [Releases](https://github.com/zljcode/ZephyrTasks/releases) 页面下载最新版 `小猪桌面代办助手.exe`，双击即可运行，无需安装 Python 或任何依赖。
+前往 [Releases](https://github.com/zljcode/ZephyrTasks/releases) 页面下载最新版 `zephyrtodo.exe`，双击即可运行，无需安装 Python 或任何依赖。
 
 ### 方式二：从源码运行
 
 ```bash
-# 安装依赖
-pip install PyQt5
+# 创建虚拟环境并安装依赖
+python -m venv .venv
+.venv/Scripts/pip install PyQt5
 
 # 运行
-cd ZephyrTasks
 python main.py
 ```
 
@@ -63,4 +63,12 @@ python main.py
 
 ## 📦 自行打包
 
-详见 [PACKAGING.md](PACKAGING.md)。
+```bash
+# 安装打包依赖
+.venv/Scripts/pip install pyinstaller
+
+# 使用 spec 文件打包
+.venv/Scripts/pyinstaller 小猪桌面代办助手.spec
+```
+
+输出：`dist/zephyrtodo.exe`。更多细节详见 [PACKAGING.md](PACKAGING.md)。
