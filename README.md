@@ -2,9 +2,12 @@
 
 极简风格悬浮桌面待办列表小组件，暖白半透明质感，高保真 UI 设计。无标题栏、菜单栏、状态栏，通过悬浮窗和快捷交互完成待办管理。
 
-<p align="center">
-  <img src="resources/show.png" width="280" alt="小猪桌面代办助手">
-</p>
+<table>
+  <tr>
+    <td><img src="resources/show.png" width="280" alt="截图1"></td>
+    <td><img src="resources/show2.png" width="280" alt="截图2"></td>
+  </tr>
+</table>
 
 ## 运行方式
 
