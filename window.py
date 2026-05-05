@@ -22,8 +22,6 @@ class MainWindow(QWidget):
         self._drag_offset = QPoint()
         self._dragging = False
         self.db = Database()
-        self._close_btn_rect = QRect(0, 0, 12, 12)
-        self._resize_margin = 5
 
         self._init_window()
         self._init_ui()
@@ -291,15 +289,16 @@ class MainWindow(QWidget):
                         y -= 65536
                     pos = self.mapFromGlobal(QPoint(x, y))
 
-                    # Don't interfere with close button or interactive child widgets
+                    # Explicitly mark interactive areas as HTCLIENT so Windows
+                    # doesn't treat them as HTTRANSPARENT on some OS versions
                     if self._close_btn_rect.contains(pos):
-                        return False, 0
+                        return True, 1  # HTCLIENT
                     child = self.childAt(pos)
                     if isinstance(child, (TaskRowWidget, InlineInput, AddButton,
                                          CustomCheckBox, DeleteButton, QSizeGrip)):
-                        return False, 0
+                        return True, 1  # HTCLIENT
                     if child and child.parent() and isinstance(child.parent(), TaskRowWidget):
-                        return False, 0
+                        return True, 1  # HTCLIENT
 
                     m = self._resize_margin
                     w, h = self.width(), self.height()
@@ -320,6 +319,8 @@ class MainWindow(QWidget):
                         return True, 0xC  # HTTOP
                     elif pos.y() > h - m:
                         return True, 0xF  # HTBOTTOM
+                    else:
+                        return True, 1  # HTCLIENT
             except Exception:
                 pass
 

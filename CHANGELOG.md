@@ -77,3 +77,28 @@
 - 清理 `main.py`：移除冗余的 `sys.path.insert` 和 `os` 导入，解决 PyInstaller onefile 环境下 `ModuleNotFoundError: No module named 'window'` 报错
 - 打包命令：`pyinstaller --onefile --windowed --name "小猪桌面代办助手" --paths . main.py`
 - 输出：`dist/小猪桌面代办助手.exe`（约 39MB），无需安装 Python 即可运行
+
+## PyInstaller 打包分发修复（别人电脑无法运行）
+
+- **Bug**: 打包的 exe 在自己电脑可运行，发给别人无法运行（双击无反应/闪退）
+- **根因 1**: Qt 平台插件 `qwindows.dll` 未被打包，或者目标路径错误。PyInstaller 运行时 hook 将 `QT_PLUGIN_PATH` 设为 `PyQt5/Qt5/plugins`，但 spec 中 `datas` 需要将 platforms 目录显式映射到正确目标路径 `PyQt5\Qt5\plugins\platforms`
+- **根因 2**: 目标机器缺少 MSVC 运行时 DLL（`msvcp140.dll`、`vcruntime140.dll`、`vcruntime140_1.dll` 等）和 OpenGL 依赖 DLL（`libEGL.dll`、`libGLESv2.dll`、`d3dcompiler_47.dll`），这些在开发机上有（随 Python/VS 安装），但在干净 Windows 上不存在
+- **修复**: 
+  - `datas` 中显式将 Qt platforms 插件目录映射到 `PyQt5\Qt5\plugins\platforms`
+  - `binaries` 中显式打包 9 个关键运行时 DLL：msvcp140/msvcp140_1/msvcp140_2、vcruntime140/vcruntime140_1、concrt140、libEGL、libGLESv2、d3dcompiler_47
+  - `hiddenimports` 显式声明 PyQt5.QtCore/QtGui/QtWidgets/Qt5.sip
+  - spec 文件通过 `SPECPATH` 自动定位 `.venv` 中的 PyQt5 路径，无需硬编码
+- exe 体积由 39MB 增至 41MB（DLL 补充约 2MB）
+
+## 跨电脑点击交互失效修复（别人电脑无法点击）
+
+- **Bug**: exe 在别人电脑上窗口可渲染、可拖拽，但所有内部交互全部失灵（添加任务、完成任务、删除任务、关闭按钮均无法点击）
+- **根因**: `nativeEvent` 处理 `WM_NCHITTEST` 时，对子控件区域（按钮、复选框、关闭按钮等）返回 `(False, 0)`，让 Windows 做默认判定。在无边框 + `WA_TranslucentBackground` 窗口下，某些 Windows 版本/更新的 `DefWindowProc` 会将未处理的 hit-test 区域判定为 `HTTRANSPARENT`（鼠标穿透），导致所有点击事件直接透传到背后窗口，子控件永远收不到事件
+- **修复**: 将所有交互区域的 `WM_NCHITTEST` 返回值从 `(False, 0)` 改为 `(True, 1)`（`HTCLIENT`），显式告知 Windows 这些区域是正常客户区，不应穿透。同时新增 `else` 分支覆盖窗口内部非边缘区域，统一返回 `HTCLIENT`
+
+## 虚拟环境配置
+
+- 项目根目录创建 `.venv` 虚拟环境，仅安装 PyQt5 + PyInstaller 两个依赖
+- `.gitignore` 添加 `.venv/` 排除项
+- 打包命令改为使用虚拟环境：`.venv/Scripts/pyinstaller 小猪桌面代办助手.spec`
+- 复现打包只需：`python -m venv .venv && .venv/Scripts/pip install pyqt5 pyinstaller`
