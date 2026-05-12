@@ -57,7 +57,7 @@ class Database:
         self.conn.commit()
 
     def update_task(self, task_id, title):
-        """更新任务标题，返回受影响行数"""
+        """更新任务标题，返回是否更新成功"""
         cursor = self.conn.execute(
             "UPDATE tasks SET title=? WHERE id=?", (title, task_id)
         )
