@@ -135,7 +135,7 @@ class TaskRowWidget(QWidget):
         self._edit_input.setStyleSheet(
             'background: rgba(232, 224, 213, 0.06); color: #E8E0D5; border: 1px solid #C9A96E; '
             'border-radius: 4px; padding: 2px 6px; '
-            f'font: {self._BASE_FONT_SIZE}px "Microsoft YaHei", "微软雅黑", "PingFang SC", sans-serif;'
+            f'font: {self._BASE_FONT_SIZE}px "幼圆", "YouYuan", "Segoe UI", sans-serif;'
         )
         self._edit_input.returnPressed.connect(self._on_edit_done)
         layout.addWidget(self._edit_input)
@@ -155,12 +155,12 @@ class TaskRowWidget(QWidget):
         fs = font_size or self._BASE_FONT_SIZE
         if completed:
             self.title_label.setStyleSheet(
-                f'font: {fs}px "Microsoft YaHei", "微软雅黑", "PingFang SC", sans-serif; '
+                f'font: {fs}px "幼圆", "YouYuan", "Segoe UI", sans-serif; '
                 'color: #5A564D; text-decoration: line-through; background: transparent;'
             )
         else:
             self.title_label.setStyleSheet(
-                f'font: {fs}px "Microsoft YaHei", "微软雅黑", "PingFang SC", sans-serif; '
+                f'font: {fs}px "幼圆", "YouYuan", "Segoe UI", sans-serif; '
                 'color: #E8E0D5; background: transparent;'
             )
 
@@ -172,7 +172,7 @@ class TaskRowWidget(QWidget):
         self._edit_input.setStyleSheet(
             'background: rgba(232, 224, 213, 0.06); color: #E8E0D5; border: 1px solid #C9A96E; '
             'border-radius: 4px; padding: 2px 6px; '
-            f'font: {edit_fs}px "Microsoft YaHei", "微软雅黑", "PingFang SC", sans-serif;'
+            f'font: {edit_fs}px "幼圆", "YouYuan", "Segoe UI", sans-serif;'
         )
 
     def _on_toggle(self, state):
@@ -324,7 +324,7 @@ class InlineInput(QLineEdit):
         self.setStyleSheet(
             f'background: rgba(232, 224, 213, 0.06); color: #E8E0D5; '
             f'border: 1px solid rgba(201, 169, 110, 0.3); border-radius: 8px; '
-            f'font: {self._current_font_size}px "Microsoft YaHei", "微软雅黑", "PingFang SC", sans-serif; '
+            f'font: {self._current_font_size}px "幼圆", "YouYuan", "Segoe UI", sans-serif; '
             f'padding: 0 12px;'
         )
         self.setPlaceholderText("")
