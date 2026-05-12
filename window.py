@@ -2,7 +2,7 @@ import ctypes
 import ctypes.wintypes
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QScrollArea, QSizePolicy, QSizeGrip,
-    QLabel, QApplication, QGraphicsOpacityEffect,
+    QLabel, QApplication,
 )
 from PyQt5.QtCore import Qt, QPoint, QRect, QRectF
 from PyQt5.QtGui import QPainter, QPainterPath, QColor, QPen, QFont, QLinearGradient
