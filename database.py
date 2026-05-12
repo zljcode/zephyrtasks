@@ -56,6 +56,20 @@ class Database:
         self.conn.execute("DELETE FROM tasks WHERE id=?", (task_id,))
         self.conn.commit()
 
+    def update_task(self, task_id, title):
+        """更新任务标题，返回受影响行数"""
+        cursor = self.conn.execute(
+            "UPDATE tasks SET title=? WHERE id=?", (title, task_id)
+        )
+        self.conn.commit()
+        return cursor.rowcount > 0
+
+    def clear_completed_tasks(self):
+        """删除所有已完成任务，返回删除数量"""
+        cursor = self.conn.execute("DELETE FROM tasks WHERE completed=1")
+        self.conn.commit()
+        return cursor.rowcount
+
     def get_all_tasks(self):
         cursor = self.conn.execute("""
             SELECT * FROM tasks
