@@ -2,9 +2,9 @@ import ctypes
 import ctypes.wintypes
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QScrollArea, QSizePolicy, QSizeGrip,
-    QLabel, QApplication,
+    QLabel, QApplication, QGraphicsOpacityEffect,
 )
-from PyQt5.QtCore import Qt, QPoint, QRect, QRectF
+from PyQt5.QtCore import Qt, QPoint, QRect, QRectF, QTimer, QPropertyAnimation
 from PyQt5.QtGui import QPainter, QPainterPath, QColor, QPen, QFont, QLinearGradient
 
 from database import Database
@@ -23,6 +23,7 @@ class MainWindow(QWidget):
         self._drag_offset = QPoint()
         self._dragging = False
         self.db = Database()
+        self._last_action = None
 
         self._init_window()
         self._init_ui()
@@ -113,15 +114,69 @@ class MainWindow(QWidget):
         scroll.setWidget(self.list_container)
         main_layout.addWidget(scroll, 1)
 
-        # Separator line above add button
+        # Separator line above bottom row
         sep_bottom = QWidget(self)
         sep_bottom.setFixedHeight(1)
         sep_bottom.setStyleSheet("background: rgba(0,0,0,25); margin: 0 8px;")
         main_layout.addWidget(sep_bottom)
 
+        # Bottom row: clear button + add button
+        bottom_row = QWidget(self)
+        bottom_row.setStyleSheet("background: transparent;")
+        bottom_layout = QHBoxLayout(bottom_row)
+        bottom_layout.setContentsMargins(12, 0, 12, 0)
+        bottom_layout.setSpacing(0)
+
+        self.clear_btn = QLabel("清空已完成", self)
+        self.clear_btn.setCursor(Qt.PointingHandCursor)
+        self.clear_btn.setStyleSheet(
+            'font: 12px "幼圆", "YouYuan", "Segoe UI", "PingFang SC", sans-serif; '
+            'color: #B0A090; background: transparent; padding: 4px 0;'
+        )
+        self.clear_btn._base_font_size = 12
+        bottom_layout.addWidget(self.clear_btn)
+        bottom_layout.addStretch()
+
         self.add_btn = AddButton()
         self.add_btn.clicked.connect(self._show_input)
-        main_layout.addWidget(self.add_btn)
+        bottom_layout.addWidget(self.add_btn)
+
+        # Toast notification for undo
+        self.toast = QWidget(self)
+        self.toast.setVisible(False)
+        self.toast.setStyleSheet(
+            "background: rgba(61, 50, 38, 220); border-radius: 6px;"
+        )
+        toast_layout = QHBoxLayout(self.toast)
+        toast_layout.setContentsMargins(10, 6, 10, 6)
+        toast_layout.setSpacing(8)
+
+        self.toast_msg = QLabel(self)
+        self.toast_msg.setStyleSheet(
+            'color: #FAF6F0; font-size: 12px; background: transparent;'
+        )
+        toast_layout.addWidget(self.toast_msg)
+
+        toast_layout.addStretch()
+
+        self.toast_undo = QLabel("撤销", self)
+        self.toast_undo.setCursor(Qt.PointingHandCursor)
+        self.toast_undo.setStyleSheet(
+            'color: #C87A5A; font-size: 12px; font-weight: bold; background: transparent;'
+        )
+        toast_layout.addWidget(self.toast_undo)
+
+        self.toast_opacity = QGraphicsOpacityEffect(self.toast)
+        self.toast_opacity.setOpacity(0.0)
+        self.toast.setGraphicsEffect(self.toast_opacity)
+
+        self._toast_timer = QTimer(self)
+        self._toast_timer.setSingleShot(True)
+        self._toast_timer.timeout.connect(self._hide_toast)
+
+        main_layout.addWidget(self.toast)
+
+        main_layout.addWidget(bottom_row)
 
         # Size grip for visual resize indicator
         self._size_grip = QSizeGrip(self)
@@ -130,11 +185,15 @@ class MainWindow(QWidget):
 
         self._close_btn_rect = QRect(self.width() - 28, 8, 20, 20)
 
+        self.clear_btn.mousePressEvent = self._on_clear_click
+        self.toast_undo.mousePressEvent = lambda e: self._on_undo() if e.button() == Qt.LeftButton else None
+
     def _load_tasks(self):
         tasks = self.db.get_all_tasks()
         for task in tasks:
             self._add_task_row(task)
         self._update_counter(tasks)
+        self._update_clear_btn(tasks)
 
     def _add_task_row(self, task):
         row = TaskRowWidget(task["id"], task["title"], task["completed"], task.get("created_at"))
@@ -155,6 +214,7 @@ class MainWindow(QWidget):
         for task in tasks:
             self._add_task_row(task)
         self._update_counter(tasks)
+        self._update_clear_btn(tasks)
 
     def _update_counter(self, tasks):
         total = len(tasks)
@@ -163,6 +223,63 @@ class MainWindow(QWidget):
             self.counter_label.setText(f"{pending}/{total}")
         else:
             self.counter_label.setText("")
+
+    def _update_clear_btn(self, tasks):
+        completed_count = sum(1 for t in tasks if t["completed"])
+        if completed_count > 0:
+            self.clear_btn.setText(f"清空 {completed_count} 项已完成")
+            self.clear_btn.setStyleSheet(
+                f'font: 12px "幼圆", "YouYuan", "Segoe UI", "PingFang SC", sans-serif; '
+                'color: #C8553D; background: transparent; padding: 4px 0;'
+            )
+            self.clear_btn.setEnabled(True)
+        else:
+            self.clear_btn.setText("清空已完成")
+            self.clear_btn.setStyleSheet(
+                f'font: 12px "幼圆", "YouYuan", "Segoe UI", "PingFang SC", sans-serif; '
+                'color: #B0A090; background: transparent; padding: 4px 0;'
+            )
+            self.clear_btn.setEnabled(False)
+
+    def _on_clear_click(self, event):
+        if event.button() == Qt.LeftButton and self.clear_btn.isEnabled():
+            self._on_clear_completed()
+
+    def _on_clear_completed(self):
+        count = self.db.clear_completed_tasks()
+        if count > 0:
+            self._refresh_tasks()
+
+    def _show_toast(self, message):
+        self.toast_msg.setText(message)
+        self.toast.setVisible(True)
+        self._animate_toast_opacity(1.0)
+        self._toast_timer.start(2500)
+
+    def _hide_toast(self):
+        self._animate_toast_opacity(0.0)
+        QTimer.singleShot(150, lambda: self.toast.setVisible(False))
+
+    def _animate_toast_opacity(self, target):
+        anim = QPropertyAnimation(self.toast_opacity, b"opacity")
+        anim.setDuration(150)
+        anim.setStartValue(self.toast_opacity.opacity())
+        anim.setEndValue(target)
+        anim.start()
+
+    def _on_undo(self):
+        if self._last_action is None:
+            return
+        action = self._last_action
+        self._last_action = None
+        if action["action"] == "delete":
+            self.db.add_task(action["task"]["title"])
+            self._refresh_tasks()
+            self._show_toast("已撤销删除")
+        elif action["action"] == "toggle":
+            self.db.toggle_task(action["task"]["id"])
+            self._refresh_tasks()
+            self._show_toast("已撤销")
 
     def _show_input(self):
         self.input.show_input()
@@ -178,16 +295,34 @@ class MainWindow(QWidget):
         self.add_btn.set_enabled(True)
 
     def _on_task_toggled(self, task_id):
+        tasks = self.db.get_all_tasks()
+        task = next((t for t in tasks if t["id"] == task_id), None)
         self.db.toggle_task(task_id)
         self._refresh_tasks()
+        if task:
+            self._last_action = {"action": "toggle", "task": task}
+            new_state = "已完成" if not task["completed"] else "已恢复"
+            self._show_toast(f"「{task['title']}」{new_state}")
 
     def _on_task_deleted(self, task_id):
+        tasks = self.db.get_all_tasks()
+        task = next((t for t in tasks if t["id"] == task_id), None)
+        if task:
+            self._last_action = {"action": "delete", "task": task}
         self.db.delete_task(task_id)
         self._refresh_tasks()
+        if task:
+            self._show_toast(f"已删除「{task['title']}」")
 
     def _on_task_edited(self, task_id, new_title):
         self.db.update_task(task_id, new_title)
         self._refresh_tasks()
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Z and event.modifiers() == Qt.ControlModifier:
+            self._on_undo()
+            return
+        super().keyPressEvent(event)
 
     def _restore_position(self):
         x, y, hidden_edge = load_window_position()
@@ -294,6 +429,19 @@ class MainWindow(QWidget):
             f'font: bold {cfs}px "幼圆", "YouYuan", "Segoe UI", "PingFang SC", sans-serif; '
             'color: #B0A090; background: transparent; padding-top: 6px; padding-right: 6px;'
         )
+        # Clear button scale
+        cbfs = max(10, round(self.clear_btn._base_font_size * scale))
+        completed_count = sum(1 for t in self.db.get_all_tasks() if t["completed"])
+        if completed_count > 0:
+            self.clear_btn.setStyleSheet(
+                f'font: {cbfs}px "幼圆", "YouYuan", "Segoe UI", "PingFang SC", sans-serif; '
+                'color: #C8553D; background: transparent; padding: 4px 0;'
+            )
+        else:
+            self.clear_btn.setStyleSheet(
+                f'font: {cbfs}px "幼圆", "YouYuan", "Segoe UI", "PingFang SC", sans-serif; '
+                'color: #B0A090; background: transparent; padding: 4px 0;'
+            )
 
     # ---- Drag ----
 
