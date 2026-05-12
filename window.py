@@ -297,10 +297,11 @@ class MainWindow(QWidget):
     def _on_task_toggled(self, task_id):
         tasks = self.db.get_all_tasks()
         task = next((t for t in tasks if t["id"] == task_id), None)
+        if task:
+            self._last_action = {"action": "toggle", "task": task}
         self.db.toggle_task(task_id)
         self._refresh_tasks()
         if task:
-            self._last_action = {"action": "toggle", "task": task}
             new_state = "已完成" if not task["completed"] else "已恢复"
             self._show_toast(f"「{task['title']}」{new_state}")
 
