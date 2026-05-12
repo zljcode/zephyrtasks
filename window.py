@@ -57,7 +57,7 @@ class MainWindow(QWidget):
         self.title_label.setAlignment(Qt.AlignCenter)
         self.title_label.setFixedHeight(36)
         self.title_label.setStyleSheet(
-            'font: 15px "幼圆", "YouYuan", "Segoe UI", sans-serif; '
+            'font: bold 15px"幼圆", "YouYuan", "Segoe UI", sans-serif; '
             'color: #E8E0D5; background: transparent; padding-top: 6px;'
         )
         self.title_label._base_font_size = 15
@@ -69,7 +69,7 @@ class MainWindow(QWidget):
 
         self.counter_label = QLabel(self)
         self.counter_label.setStyleSheet(
-            'font: 11px "幼圆", "YouYuan", "Segoe UI", sans-serif; '
+            'font: bold 11px"幼圆", "YouYuan", "Segoe UI", sans-serif; '
             'color: #8B8578; background: transparent; padding-top: 6px; padding-right: 6px;'
         )
         self.counter_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
@@ -130,7 +130,7 @@ class MainWindow(QWidget):
         self.clear_btn = QLabel("清空已完成", self)
         self.clear_btn.setCursor(Qt.PointingHandCursor)
         self.clear_btn.setStyleSheet(
-            'font: 12px "幼圆", "YouYuan", "Segoe UI", sans-serif; '
+            'font: bold 12px"幼圆", "YouYuan", "Segoe UI", sans-serif; '
             'color: #8B8578; background: transparent; padding: 4px 0;'
         )
         self.clear_btn._base_font_size = 12
@@ -229,14 +229,14 @@ class MainWindow(QWidget):
         if completed_count > 0:
             self.clear_btn.setText(f"清空 {completed_count} 项已完成")
             self.clear_btn.setStyleSheet(
-                f'font: 12px "幼圆", "YouYuan", "Segoe UI", sans-serif; '
+                f'font: bold 12px"幼圆", "YouYuan", "Segoe UI", sans-serif; '
                 'color: #C9A96E; background: transparent; padding: 4px 0;'
             )
             self.clear_btn.setEnabled(True)
         else:
             self.clear_btn.setText("清空已完成")
             self.clear_btn.setStyleSheet(
-                f'font: 12px "幼圆", "YouYuan", "Segoe UI", sans-serif; '
+                f'font: bold 12px"幼圆", "YouYuan", "Segoe UI", sans-serif; '
                 'color: #5A564D; background: transparent; padding: 4px 0;'
             )
             self.clear_btn.setEnabled(False)
@@ -417,7 +417,7 @@ class MainWindow(QWidget):
         h = max(28, round(self.title_label._base_height * scale))
         self.title_label.setFixedHeight(h)
         self.title_label.setStyleSheet(
-            f'font: {fs}px "幼圆", "YouYuan", "Segoe UI", sans-serif; '
+            f'font: bold {fs}px"幼圆", "YouYuan", "Segoe UI", sans-serif; '
             'color: #E8E0D5; background: transparent; padding-top: 6px;'
         )
         # Input
@@ -433,7 +433,7 @@ class MainWindow(QWidget):
         # Counter label scale
         cfs = max(9, round(self.counter_label._base_font_size * scale))
         self.counter_label.setStyleSheet(
-            f'font: {cfs}px "幼圆", "YouYuan", "Segoe UI", sans-serif; '
+            f'font: bold {cfs}px "幼圆", "YouYuan", "Segoe UI", sans-serif; '
             'color: #8B8578; background: transparent; padding-top: 6px; padding-right: 6px;'
         )
         # Clear button scale
@@ -441,12 +441,12 @@ class MainWindow(QWidget):
         completed_count = sum(1 for t in self.db.get_all_tasks() if t["completed"])
         if completed_count > 0:
             self.clear_btn.setStyleSheet(
-                f'font: {cbfs}px "幼圆", "YouYuan", "Segoe UI", sans-serif; '
+                f'font: bold {cbfs}px "幼圆", "YouYuan", "Segoe UI", sans-serif; '
                 'color: #C9A96E; background: transparent; padding: 4px 0;'
             )
         else:
             self.clear_btn.setStyleSheet(
-                f'font: {cbfs}px "幼圆", "YouYuan", "Segoe UI", sans-serif; '
+                f'font: bold {cbfs}px "幼圆", "YouYuan", "Segoe UI", sans-serif; '
                 'color: #5A564D; background: transparent; padding: 4px 0;'
             )
 
