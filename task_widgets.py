@@ -3,13 +3,13 @@ from PyQt5.QtWidgets import (
     QGraphicsOpacityEffect, QSizePolicy,
 )
 from PyQt5.QtCore import Qt, pyqtSignal, QPropertyAnimation, QSize, QRectF
-from PyQt5.QtGui import QPainter, QPen, QColor, QFont
+from PyQt5.QtGui import QPainter, QPainterPath, QPen, QColor, QFont
 
 
 class CustomCheckBox(QCheckBox):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setFixedSize(20, 20)
+        self.setFixedSize(22, 22)
         self.setCursor(Qt.PointingHandCursor)
         self.setStyleSheet("""
             QCheckBox {
@@ -30,21 +30,28 @@ class CustomCheckBox(QCheckBox):
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
-        rect = QRectF(0.5, 0.5, 19, 19)
+
+        r = QRectF(1.5, 1.5, 19, 19)
+        radius = 5.0
+
         if self.isChecked():
             painter.setPen(Qt.NoPen)
-            painter.setBrush(QColor(100, 100, 100, 60))
-            painter.drawRoundedRect(rect, 4, 4)
-            painter.setPen(QPen(QColor("#333333"), 2))
-            font = QFont()
-            font.setPixelSize(14)
-            font.setBold(True)
-            painter.setFont(font)
-            painter.drawText(rect, Qt.AlignCenter, "✓")
-        else:
-            painter.setPen(QPen(QColor("#BBBBBB"), 1.2))
+            painter.setBrush(QColor(200, 122, 90))
+            painter.drawRoundedRect(r, radius, radius)
+
+            # Elegant checkmark path
+            painter.setPen(QPen(QColor("#FAF6F0"), 2.2, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
             painter.setBrush(Qt.NoBrush)
-            painter.drawRoundedRect(rect, 4, 4)
+            check = QPainterPath()
+            check.moveTo(5.5, 11)
+            check.lineTo(9, 14.5)
+            check.lineTo(16.5, 7)
+            painter.drawPath(check)
+        else:
+            painter.setPen(QPen(QColor("#C4B8AA"), 1.5))
+            painter.setBrush(Qt.NoBrush)
+            painter.drawRoundedRect(r, radius, radius)
+
         painter.end()
 
 
@@ -58,7 +65,7 @@ class DeleteButton(QLabel):
         self._opacity_effect = QGraphicsOpacityEffect(self)
         self._opacity_effect.setOpacity(0.0)
         self.setGraphicsEffect(self._opacity_effect)
-        self.setStyleSheet("color: #999999; font-size: 16px; background: transparent;")
+        self.setStyleSheet("color: #A09080; font-size: 16px; background: transparent;")
         self.setCursor(Qt.PointingHandCursor)
         self._hovered = False
 
@@ -76,13 +83,13 @@ class DeleteButton(QLabel):
 
     def enterEvent(self, event):
         self._hovered = True
-        self.setStyleSheet("color: #FF5555; font-size: 16px; background: transparent;")
+        self.setStyleSheet("color: #C8553D; font-size: 16px; background: transparent;")
         self._animate_opacity(1.0)
         super().enterEvent(event)
 
     def leaveEvent(self, event):
         self._hovered = False
-        self.setStyleSheet("color: #999999; font-size: 16px; background: transparent;")
+        self.setStyleSheet("color: #A09080; font-size: 16px; background: transparent;")
         self._animate_opacity(0.6)
         super().leaveEvent(event)
 
@@ -99,7 +106,7 @@ class TaskRowWidget(QWidget):
     def __init__(self, task_id, title, completed, created_at=None, parent=None):
         super().__init__(parent)
         self.task_id = task_id
-        self.setFixedHeight(40)
+        self.setFixedHeight(44)
         self.setContentsMargins(12, 4, 12, 4)
         self.setCursor(Qt.ArrowCursor)
         if created_at:
@@ -134,17 +141,17 @@ class TaskRowWidget(QWidget):
         if completed:
             self.title_label.setStyleSheet(
                 f'font: bold {fs}px "幼圆", "YouYuan", "Segoe UI", "PingFang SC", sans-serif; '
-                'color: #AAAAAA; text-decoration: line-through; background: transparent;'
+                'color: #B0A090; text-decoration: line-through; background: transparent;'
             )
         else:
             self.title_label.setStyleSheet(
                 f'font: bold {fs}px "幼圆", "YouYuan", "Segoe UI", "PingFang SC", sans-serif; '
-                'color: #333333; background: transparent;'
+                'color: #3D3226; background: transparent;'
             )
 
     def set_scale(self, scale):
         fs = max(10, round(self._BASE_FONT_SIZE * scale))
-        self.setFixedHeight(max(28, round(40 * scale)))
+        self.setFixedHeight(max(28, round(44 * scale)))
         self._update_title_style(bool(self.checkbox.isChecked()), fs)
 
     def _on_toggle(self, state):
@@ -175,7 +182,7 @@ class TaskRowWidget(QWidget):
 
     def paintEvent(self, event):
         painter = QPainter(self)
-        painter.setPen(QPen(QColor(0, 0, 0, 20), 0.5))
+        painter.setPen(QPen(QColor(61, 50, 38, 12), 0.5))
         painter.drawLine(
             12, self.height() - 1,
             self.width() - 12, self.height() - 1,
@@ -195,23 +202,23 @@ class AddButton(QLabel):
         self.setCursor(Qt.PointingHandCursor)
         self._current_font_size = self._BASE_FONT_SIZE
         self.setStyleSheet(
-            'font-size: 32px; font-weight: bold; color: #666666; background: transparent;'
+            'font-size: 32px; font-weight: bold; color: #8C7B6D; background: transparent;'
         )
         self._opacity_effect = QGraphicsOpacityEffect(self)
-        self._opacity_effect.setOpacity(0.5)
+        self._opacity_effect.setOpacity(0.4)
         self.setGraphicsEffect(self._opacity_effect)
 
     def enterEvent(self, event):
         self._animate_opacity(1.0)
         self.setStyleSheet(
-            f'font-size: {self._current_font_size + 4}px; font-weight: bold; color: #444444; background: transparent;'
+            f'font-size: {self._current_font_size + 4}px; font-weight: bold; color: #C87A5A; background: transparent;'
         )
         super().enterEvent(event)
 
     def leaveEvent(self, event):
-        self._animate_opacity(0.5)
+        self._animate_opacity(0.4)
         self.setStyleSheet(
-            f'font-size: {self._current_font_size}px; font-weight: bold; color: #666666; background: transparent;'
+            f'font-size: {self._current_font_size}px; font-weight: bold; color: #8C7B6D; background: transparent;'
         )
         super().leaveEvent(event)
 
@@ -219,7 +226,7 @@ class AddButton(QLabel):
         self._current_font_size = max(16, round(self._BASE_FONT_SIZE * scale))
         self.setFixedHeight(max(36, round(self._BASE_HEIGHT * scale)))
         self.setStyleSheet(
-            f'font-size: {self._current_font_size}px; font-weight: bold; color: #666666; background: transparent;'
+            f'font-size: {self._current_font_size}px; font-weight: bold; color: #8C7B6D; background: transparent;'
         )
 
     def _animate_opacity(self, target):
@@ -237,9 +244,9 @@ class AddButton(QLabel):
     def set_enabled(self, enabled):
         self.setEnabled(enabled)
         if enabled:
-            self._animate_opacity(0.5)
+            self._animate_opacity(0.4)
         else:
-            self._animate_opacity(0.15)
+            self._animate_opacity(0.12)
 
 
 class InlineInput(QLineEdit):
@@ -256,10 +263,10 @@ class InlineInput(QLineEdit):
 
     def _apply_style(self):
         self.setStyleSheet(
-            f'background: rgba(248, 245, 241, 0.9); color: #333333; '
-            f'border: 1px solid #CCCCCC; border-radius: 6px; '
+            f'background: rgba(250, 246, 240, 0.92); color: #3D3226; '
+            f'border: 1px solid #C4B8AA; border-radius: 8px; '
             f'font: bold {self._current_font_size}px "幼圆", "YouYuan", "Segoe UI", "PingFang SC", sans-serif; '
-            f'padding: 0 10px;'
+            f'padding: 0 12px;'
         )
         self.setPlaceholderText("")
         self.returnPressed.connect(self._on_return)

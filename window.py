@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QScrollArea, QSizePolicy, QSizeGrip, QLabel, QApplication,
 )
 from PyQt5.QtCore import Qt, QPoint, QRect, QRectF
-from PyQt5.QtGui import QPainter, QPainterPath, QColor, QPen, QFont
+from PyQt5.QtGui import QPainter, QPainterPath, QColor, QPen, QFont, QLinearGradient
 
 from database import Database
 from task_widgets import TaskRowWidget, AddButton, InlineInput, CustomCheckBox, DeleteButton
@@ -45,12 +45,12 @@ class MainWindow(QWidget):
         main_layout.setSpacing(0)
 
         # Title
-        self.title_label = QLabel("小猪桌面代办助手", self)
+        self.title_label = QLabel("🐷 桌面代办", self)
         self.title_label.setAlignment(Qt.AlignCenter)
         self.title_label.setFixedHeight(36)
         self.title_label.setStyleSheet(
             'font: bold 15px "幼圆", "YouYuan", "Segoe UI", "PingFang SC", sans-serif; '
-            'color: #333333; background: transparent; padding-top: 6px;'
+            'color: #3D3226; background: transparent; padding-top: 6px;'
         )
         self.title_label._base_font_size = 15
         self.title_label._base_height = 36
@@ -59,7 +59,7 @@ class MainWindow(QWidget):
         # Separator line
         separator = QWidget(self)
         separator.setFixedHeight(1)
-        separator.setStyleSheet("background: rgba(0,0,0,25); margin: 0 8px;")
+        separator.setStyleSheet("background: rgba(61,50,38,15); margin: 0 8px;")
         main_layout.addWidget(separator)
 
         self.input = InlineInput(self)
@@ -75,8 +75,8 @@ class MainWindow(QWidget):
         scroll.setStyleSheet(
             "QScrollArea { background: transparent; border: none; }"
             "QScrollBar:vertical { width: 4px; background: transparent; }"
-            "QScrollBar::handle:vertical { background: rgba(0,0,0,40); border-radius: 2px; min-height: 20px; }"
-            "QScrollBar::handle:vertical:hover { background: rgba(0,0,0,80); }"
+            "QScrollBar::handle:vertical { background: rgba(61,50,38,30); border-radius: 2px; min-height: 20px; }"
+            "QScrollBar::handle:vertical:hover { background: rgba(61,50,38,60); }"
             "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0; }"
             "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical { background: none; }"
         )
@@ -106,7 +106,7 @@ class MainWindow(QWidget):
         self._size_grip.setFixedSize(14, 14)
         self._size_grip.setStyleSheet("background: transparent;")
 
-        self._close_btn_rect = QRect(self.width() - 26, 6, 18, 18)
+        self._close_btn_rect = QRect(self.width() - 28, 8, 20, 20)
 
     def _load_tasks(self):
         tasks = self.db.get_all_tasks()
@@ -177,39 +177,51 @@ class MainWindow(QWidget):
 
         full_rect = QRectF(self.rect())
 
-        # Soft shadow (drawn slightly larger, behind the card)
-        shadow_rect = full_rect.adjusted(-2, -2, 2, 2)
-        shadow_path = QPainterPath()
-        shadow_path.addRoundedRect(shadow_rect, 14, 14)
-        painter.fillPath(shadow_path, QColor(0, 0, 0, 18))
+        # Multi-layer shadow for realistic depth
+        shadow_color = QColor(61, 50, 38, 10)
+        for i in range(5):
+            offset = i * 1.2
+            shadow_rect = full_rect.adjusted(-offset, offset * 0.8, offset, offset * 2.5)
+            shadow_path = QPainterPath()
+            shadow_path.addRoundedRect(shadow_rect, 12 + i, 12 + i)
+            painter.fillPath(shadow_path, shadow_color)
 
-        # Warm white semi-transparent card
+        # Near shadow for tighter definition
+        near_shadow = QPainterPath()
+        near_shadow.addRoundedRect(full_rect.adjusted(0, 1, 0, 3), 10, 10)
+        painter.fillPath(near_shadow, QColor(61, 50, 38, 20))
+
+        # Card with subtle gradient
+        gradient = QLinearGradient(full_rect.topLeft(), full_rect.bottomLeft())
+        gradient.setColorAt(0.0, QColor(250, 248, 244, 232))
+        gradient.setColorAt(0.5, QColor(250, 246, 240, 232))
+        gradient.setColorAt(1.0, QColor(246, 241, 234, 232))
+
         content_path = QPainterPath()
         content_path.addRoundedRect(full_rect, 10, 10)
-        painter.fillPath(content_path, QColor(248, 245, 241, 230))
+        painter.fillPath(content_path, gradient)
 
-        # Subtle border
-        painter.setPen(QPen(QColor(0, 0, 0, 15), 0.5))
+        # Refined border: warm tone, slightly thicker on top for light catch
+        painter.setPen(QPen(QColor(61, 50, 38, 18), 0.5))
         painter.drawPath(content_path)
 
-        # Close button
-        self._close_btn_rect = QRect(self.width() - 26, 6, 18, 18)
+        # Close button — refined pill shape
+        self._close_btn_rect = QRect(self.width() - 28, 8, 20, 20)
         cb = self._close_btn_rect
         cursor = self.mapFromGlobal(self.cursor().pos())
         hover = cb.contains(cursor)
 
         if hover:
-            # Red circle background
             painter.setPen(Qt.NoPen)
-            painter.setBrush(QColor(255, 100, 100, 180))
-            cx, cy = cb.center().x(), cb.center().y()
-            painter.drawEllipse(QPoint(cx, cy), 9, 9)
-            # White X
-            painter.setPen(QPen(QColor("#FFFFFF"), 2))
+            painter.setBrush(QColor(220, 110, 80, 200))
+            painter.drawRoundedRect(QRectF(cb), 5, 5)
+            painter.setPen(QPen(QColor("#FAF6F0"), 1.8, Qt.SolidLine, Qt.RoundCap))
         else:
-            painter.setPen(QPen(QColor("#999999"), 1.5))
-        painter.drawLine(cb.topLeft() + QPoint(4, 4), cb.bottomRight() - QPoint(4, 4))
-        painter.drawLine(cb.topRight() + QPoint(-4, 4), cb.bottomLeft() + QPoint(4, -4))
+            painter.setPen(QPen(QColor("#A09080"), 1.5, Qt.SolidLine, Qt.RoundCap))
+
+        m = 5
+        painter.drawLine(cb.left() + m, cb.top() + m, cb.right() - m, cb.bottom() - m)
+        painter.drawLine(cb.right() - m, cb.top() + m, cb.left() + m, cb.bottom() - m)
         painter.end()
 
     def resizeEvent(self, event):
@@ -227,7 +239,7 @@ class MainWindow(QWidget):
         self.title_label.setFixedHeight(h)
         self.title_label.setStyleSheet(
             f'font: bold {fs}px "幼圆", "YouYuan", "Segoe UI", "PingFang SC", sans-serif; '
-            'color: #333333; background: transparent; padding-top: 6px;'
+            'color: #3D3226; background: transparent; padding-top: 6px;'
         )
         # Input
         self.input.set_scale(scale)
