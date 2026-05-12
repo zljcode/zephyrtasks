@@ -2,7 +2,7 @@ import ctypes
 import ctypes.wintypes
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QScrollArea, QSizePolicy, QSizeGrip,
-    QLabel, QApplication, QGraphicsOpacityEffect,
+    QLabel, QApplication, QGraphicsOpacityEffect, QLineEdit,
 )
 from PyQt5.QtCore import Qt, QPoint, QRect, QRectF, QTimer, QPropertyAnimation
 from PyQt5.QtGui import QPainter, QPainterPath, QColor, QPen, QFont, QLinearGradient
@@ -248,7 +248,9 @@ class MainWindow(QWidget):
     def _on_clear_completed(self):
         count = self.db.clear_completed_tasks()
         if count > 0:
+            self._last_action = None
             self._refresh_tasks()
+            self._show_toast(f"已清空 {count} 项已完成任务")
 
     def _show_toast(self, message):
         self.toast_msg.setText(message)
@@ -321,6 +323,10 @@ class MainWindow(QWidget):
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Z and event.modifiers() == Qt.ControlModifier:
+            focus_widget = QApplication.focusWidget()
+            if isinstance(focus_widget, QLineEdit):
+                super().keyPressEvent(event)
+                return
             self._on_undo()
             return
         super().keyPressEvent(event)
