@@ -57,8 +57,8 @@ class MainWindow(QWidget):
         self.title_label.setAlignment(Qt.AlignCenter)
         self.title_label.setFixedHeight(36)
         self.title_label.setStyleSheet(
-            'font: bold 15px "幼圆", "YouYuan", "Segoe UI", "PingFang SC", sans-serif; '
-            'color: #3D3226; background: transparent; padding-top: 6px;'
+            'font: 15px "KaiTi", "STKaiti", "华文楷体", "楷体", serif; '
+            'color: #E8E0D5; background: transparent; padding-top: 6px;'
         )
         self.title_label._base_font_size = 15
         self.title_label._base_height = 36
@@ -69,8 +69,8 @@ class MainWindow(QWidget):
 
         self.counter_label = QLabel(self)
         self.counter_label.setStyleSheet(
-            'font: bold 11px "幼圆", "YouYuan", "Segoe UI", "PingFang SC", sans-serif; '
-            'color: #B0A090; background: transparent; padding-top: 6px; padding-right: 6px;'
+            'font: 11px "Microsoft YaHei", "微软雅黑", "PingFang SC", sans-serif; '
+            'color: #8B8578; background: transparent; padding-top: 6px; padding-right: 6px;'
         )
         self.counter_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         self.counter_label.setFixedWidth(36)
@@ -82,7 +82,7 @@ class MainWindow(QWidget):
         # Separator line
         separator = QWidget(self)
         separator.setFixedHeight(1)
-        separator.setStyleSheet("background: rgba(61,50,38,15); margin: 0 8px;")
+        separator.setStyleSheet("background: rgba(232,224,213,15); margin: 0 8px;")
         main_layout.addWidget(separator)
 
         self.input = InlineInput(self)
@@ -98,8 +98,8 @@ class MainWindow(QWidget):
         scroll.setStyleSheet(
             "QScrollArea { background: transparent; border: none; }"
             "QScrollBar:vertical { width: 4px; background: transparent; }"
-            "QScrollBar::handle:vertical { background: rgba(61,50,38,30); border-radius: 2px; min-height: 20px; }"
-            "QScrollBar::handle:vertical:hover { background: rgba(61,50,38,60); }"
+            "QScrollBar::handle:vertical { background: rgba(232,224,213,30); border-radius: 2px; min-height: 20px; }"
+            "QScrollBar::handle:vertical:hover { background: rgba(232,224,213,51); }"
             "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0; }"
             "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical { background: none; }"
         )
@@ -117,7 +117,7 @@ class MainWindow(QWidget):
         # Separator line above bottom row
         sep_bottom = QWidget(self)
         sep_bottom.setFixedHeight(1)
-        sep_bottom.setStyleSheet("background: rgba(0,0,0,25); margin: 0 8px;")
+        sep_bottom.setStyleSheet("background: rgba(232,224,213,20); margin: 0 8px;")
         main_layout.addWidget(sep_bottom)
 
         # Bottom row: clear button + add button
@@ -130,8 +130,8 @@ class MainWindow(QWidget):
         self.clear_btn = QLabel("清空已完成", self)
         self.clear_btn.setCursor(Qt.PointingHandCursor)
         self.clear_btn.setStyleSheet(
-            'font: 12px "幼圆", "YouYuan", "Segoe UI", "PingFang SC", sans-serif; '
-            'color: #B0A090; background: transparent; padding: 4px 0;'
+            'font: 12px "Microsoft YaHei", "微软雅黑", "PingFang SC", sans-serif; '
+            'color: #8B8578; background: transparent; padding: 4px 0;'
         )
         self.clear_btn._base_font_size = 12
         bottom_layout.addWidget(self.clear_btn)
@@ -145,7 +145,7 @@ class MainWindow(QWidget):
         self.toast = QWidget(self)
         self.toast.setVisible(False)
         self.toast.setStyleSheet(
-            "background: rgba(61, 50, 38, 220); border-radius: 6px;"
+            "background: rgba(232, 224, 213, 242); border-radius: 6px;"
         )
         toast_layout = QHBoxLayout(self.toast)
         toast_layout.setContentsMargins(10, 6, 10, 6)
@@ -153,7 +153,7 @@ class MainWindow(QWidget):
 
         self.toast_msg = QLabel(self)
         self.toast_msg.setStyleSheet(
-            'color: #FAF6F0; font-size: 12px; background: transparent;'
+            'color: #1A1D2E; font-size: 12px; background: transparent;'
         )
         toast_layout.addWidget(self.toast_msg)
 
@@ -162,7 +162,7 @@ class MainWindow(QWidget):
         self.toast_undo = QLabel("撤销", self)
         self.toast_undo.setCursor(Qt.PointingHandCursor)
         self.toast_undo.setStyleSheet(
-            'color: #C87A5A; font-size: 12px; font-weight: bold; background: transparent;'
+            'color: #8B3A3A; font-size: 12px; font-weight: bold; background: transparent;'
         )
         toast_layout.addWidget(self.toast_undo)
 
@@ -229,15 +229,15 @@ class MainWindow(QWidget):
         if completed_count > 0:
             self.clear_btn.setText(f"清空 {completed_count} 项已完成")
             self.clear_btn.setStyleSheet(
-                f'font: 12px "幼圆", "YouYuan", "Segoe UI", "PingFang SC", sans-serif; '
-                'color: #C8553D; background: transparent; padding: 4px 0;'
+                f'font: 12px "Microsoft YaHei", "微软雅黑", "PingFang SC", sans-serif; '
+                'color: #C9A96E; background: transparent; padding: 4px 0;'
             )
             self.clear_btn.setEnabled(True)
         else:
             self.clear_btn.setText("清空已完成")
             self.clear_btn.setStyleSheet(
-                f'font: 12px "幼圆", "YouYuan", "Segoe UI", "PingFang SC", sans-serif; '
-                'color: #B0A090; background: transparent; padding: 4px 0;'
+                f'font: 12px "Microsoft YaHei", "微软雅黑", "PingFang SC", sans-serif; '
+                'color: #5A564D; background: transparent; padding: 4px 0;'
             )
             self.clear_btn.setEnabled(False)
 
@@ -356,35 +356,35 @@ class MainWindow(QWidget):
 
         full_rect = QRectF(self.rect())
 
-        # Multi-layer shadow for realistic depth
-        shadow_color = QColor(61, 50, 38, 10)
+        # Multi-layer dark shadow
+        shadow_color = QColor(0, 0, 0, 25)
         for i in range(5):
-            offset = i * 1.2
-            shadow_rect = full_rect.adjusted(-offset, offset * 0.8, offset, offset * 2.5)
+            offset = i * 1.5
+            shadow_rect = full_rect.adjusted(-offset, offset * 0.6, offset, offset * 2.2)
             shadow_path = QPainterPath()
             shadow_path.addRoundedRect(shadow_rect, 12 + i, 12 + i)
             painter.fillPath(shadow_path, shadow_color)
 
-        # Near shadow for tighter definition
+        # Near shadow
         near_shadow = QPainterPath()
-        near_shadow.addRoundedRect(full_rect.adjusted(0, 1, 0, 3), 10, 10)
-        painter.fillPath(near_shadow, QColor(61, 50, 38, 20))
+        near_shadow.addRoundedRect(full_rect.adjusted(0, 1, 0, 4), 10, 10)
+        painter.fillPath(near_shadow, QColor(0, 0, 0, 40))
 
-        # Card with subtle gradient
+        # Card with deep navy gradient
         gradient = QLinearGradient(full_rect.topLeft(), full_rect.bottomLeft())
-        gradient.setColorAt(0.0, QColor(250, 248, 244, 232))
-        gradient.setColorAt(0.5, QColor(250, 246, 240, 232))
-        gradient.setColorAt(1.0, QColor(246, 241, 234, 232))
+        gradient.setColorAt(0.0, QColor(26, 29, 46, 235))
+        gradient.setColorAt(0.5, QColor(31, 35, 56, 235))
+        gradient.setColorAt(1.0, QColor(28, 32, 64, 235))
 
         content_path = QPainterPath()
         content_path.addRoundedRect(full_rect, 10, 10)
         painter.fillPath(content_path, gradient)
 
-        # Refined border: warm tone, slightly thicker on top for light catch
-        painter.setPen(QPen(QColor(61, 50, 38, 18), 0.5))
+        # Subtle gold-tinted border
+        painter.setPen(QPen(QColor(201, 169, 110, 25), 0.5))
         painter.drawPath(content_path)
 
-        # Close button — refined pill shape
+        # Close button
         self._close_btn_rect = QRect(self.width() - 28, 8, 20, 20)
         cb = self._close_btn_rect
         cursor = self.mapFromGlobal(self.cursor().pos())
@@ -392,11 +392,11 @@ class MainWindow(QWidget):
 
         if hover:
             painter.setPen(Qt.NoPen)
-            painter.setBrush(QColor(220, 110, 80, 200))
+            painter.setBrush(QColor(160, 69, 69, 200))  # burgundy
             painter.drawRoundedRect(QRectF(cb), 5, 5)
-            painter.setPen(QPen(QColor("#FAF6F0"), 1.8, Qt.SolidLine, Qt.RoundCap))
+            painter.setPen(QPen(QColor("#E8E0D5"), 1.8, Qt.SolidLine, Qt.RoundCap))
         else:
-            painter.setPen(QPen(QColor("#A09080"), 1.5, Qt.SolidLine, Qt.RoundCap))
+            painter.setPen(QPen(QColor("#8B8578"), 1.5, Qt.SolidLine, Qt.RoundCap))
 
         m = 5
         painter.drawLine(cb.left() + m, cb.top() + m, cb.right() - m, cb.bottom() - m)
@@ -417,8 +417,8 @@ class MainWindow(QWidget):
         h = max(28, round(self.title_label._base_height * scale))
         self.title_label.setFixedHeight(h)
         self.title_label.setStyleSheet(
-            f'font: bold {fs}px "幼圆", "YouYuan", "Segoe UI", "PingFang SC", sans-serif; '
-            'color: #3D3226; background: transparent; padding-top: 6px;'
+            f'font: {fs}px "KaiTi", "STKaiti", "华文楷体", "楷体", serif; '
+            'color: #E8E0D5; background: transparent; padding-top: 6px;'
         )
         # Input
         self.input.set_scale(scale)
@@ -433,21 +433,21 @@ class MainWindow(QWidget):
         # Counter label scale
         cfs = max(9, round(self.counter_label._base_font_size * scale))
         self.counter_label.setStyleSheet(
-            f'font: bold {cfs}px "幼圆", "YouYuan", "Segoe UI", "PingFang SC", sans-serif; '
-            'color: #B0A090; background: transparent; padding-top: 6px; padding-right: 6px;'
+            f'font: {cfs}px "Microsoft YaHei", "微软雅黑", "PingFang SC", sans-serif; '
+            'color: #8B8578; background: transparent; padding-top: 6px; padding-right: 6px;'
         )
         # Clear button scale
         cbfs = max(10, round(self.clear_btn._base_font_size * scale))
         completed_count = sum(1 for t in self.db.get_all_tasks() if t["completed"])
         if completed_count > 0:
             self.clear_btn.setStyleSheet(
-                f'font: {cbfs}px "幼圆", "YouYuan", "Segoe UI", "PingFang SC", sans-serif; '
-                'color: #C8553D; background: transparent; padding: 4px 0;'
+                f'font: {cbfs}px "Microsoft YaHei", "微软雅黑", "PingFang SC", sans-serif; '
+                'color: #C9A96E; background: transparent; padding: 4px 0;'
             )
         else:
             self.clear_btn.setStyleSheet(
-                f'font: {cbfs}px "幼圆", "YouYuan", "Segoe UI", "PingFang SC", sans-serif; '
-                'color: #B0A090; background: transparent; padding: 4px 0;'
+                f'font: {cbfs}px "Microsoft YaHei", "微软雅黑", "PingFang SC", sans-serif; '
+                'color: #5A564D; background: transparent; padding: 4px 0;'
             )
 
     # ---- Drag ----
