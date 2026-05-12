@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import (
     QWidget, QHBoxLayout, QLabel, QCheckBox, QLineEdit,
     QGraphicsOpacityEffect, QSizePolicy,
 )
-from PyQt5.QtCore import Qt, pyqtSignal, QPropertyAnimation, QSize, QRectF
+from PyQt5.QtCore import Qt, pyqtSignal, QPropertyAnimation, QSize, QRectF, QEvent
 from PyQt5.QtGui import QPainter, QPainterPath, QPen, QColor, QFont
 
 
@@ -133,7 +133,7 @@ class TaskRowWidget(QWidget):
         self._edit_input.setVisible(False)
         self._edit_input.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         self._edit_input.setStyleSheet(
-            'background: white; color: #3D3226; border: 1px solid #C87A5A; '
+            'background: rgba(250, 246, 240, 0.92); color: #3D3226; border: 1px solid #C87A5A; '
             'border-radius: 4px; padding: 2px 6px; '
             f'font: bold {self._BASE_FONT_SIZE}px "幼圆", "YouYuan", "Segoe UI", "PingFang SC", sans-serif;'
         )
@@ -147,6 +147,7 @@ class TaskRowWidget(QWidget):
         layout.addWidget(self.delete_btn)
 
         self._separator_visible = True
+        self._editing = False
 
     _BASE_FONT_SIZE = 16
 
@@ -169,7 +170,7 @@ class TaskRowWidget(QWidget):
         self._update_title_style(bool(self.checkbox.isChecked()), fs)
         edit_fs = max(10, round(self._BASE_FONT_SIZE * scale))
         self._edit_input.setStyleSheet(
-            'background: white; color: #3D3226; border: 1px solid #C87A5A; '
+            'background: rgba(250, 246, 240, 0.92); color: #3D3226; border: 1px solid #C87A5A; '
             'border-radius: 4px; padding: 2px 6px; '
             f'font: bold {edit_fs}px "幼圆", "YouYuan", "Segoe UI", "PingFang SC", sans-serif;'
         )
@@ -200,6 +201,7 @@ class TaskRowWidget(QWidget):
         super().mouseDoubleClickEvent(event)
 
     def _enter_edit_mode(self):
+        self._editing = True
         self._edit_input.setText(self.title_label.text())
         self._edit_input.setVisible(True)
         self._edit_input.setFocus()
@@ -207,6 +209,7 @@ class TaskRowWidget(QWidget):
         self.title_label.setVisible(False)
 
     def _exit_edit_mode(self, save):
+        self._editing = False
         if save:
             new_title = self._edit_input.text().strip()
             if new_title and new_title != self.title_label.text():
@@ -218,7 +221,8 @@ class TaskRowWidget(QWidget):
         self._exit_edit_mode(True)
 
     def enterEvent(self, event):
-        self.delete_btn.set_visible(True)
+        if not self._editing:
+            self.delete_btn.set_visible(True)
         super().enterEvent(event)
 
     def leaveEvent(self, event):
@@ -226,11 +230,13 @@ class TaskRowWidget(QWidget):
         super().leaveEvent(event)
 
     def eventFilter(self, obj, event):
-        from PyQt5.QtCore import QEvent
         if obj == self._edit_input and event.type() == QEvent.KeyPress:
             if event.key() == Qt.Key_Escape:
                 self._exit_edit_mode(False)
                 return True
+        if obj == self._edit_input and event.type() == QEvent.FocusOut:
+            self._exit_edit_mode(False)
+            return True
         return super().eventFilter(obj, event)
 
     def paintEvent(self, event):
