@@ -1,7 +1,8 @@
 import ctypes
 import ctypes.wintypes
 from PyQt5.QtWidgets import (
-    QWidget, QVBoxLayout, QScrollArea, QSizePolicy, QSizeGrip, QLabel, QApplication,
+    QWidget, QVBoxLayout, QHBoxLayout, QScrollArea, QSizePolicy, QSizeGrip,
+    QLabel, QApplication, QGraphicsOpacityEffect,
 )
 from PyQt5.QtCore import Qt, QPoint, QRect, QRectF
 from PyQt5.QtGui import QPainter, QPainterPath, QColor, QPen, QFont, QLinearGradient
@@ -44,7 +45,13 @@ class MainWindow(QWidget):
         main_layout.setContentsMargins(6, 6, 6, 6)
         main_layout.setSpacing(0)
 
-        # Title
+        # Title row: centered title + right-aligned counter
+        title_container = QWidget(self)
+        title_container.setStyleSheet("background: transparent;")
+        title_row = QHBoxLayout(title_container)
+        title_row.setContentsMargins(0, 0, 0, 0)
+        title_row.setSpacing(0)
+
         self.title_label = QLabel("🐷 桌面代办", self)
         self.title_label.setAlignment(Qt.AlignCenter)
         self.title_label.setFixedHeight(36)
@@ -54,7 +61,22 @@ class MainWindow(QWidget):
         )
         self.title_label._base_font_size = 15
         self.title_label._base_height = 36
-        main_layout.addWidget(self.title_label)
+
+        title_row.addStretch()
+        title_row.addWidget(self.title_label)
+        title_row.addStretch()
+
+        self.counter_label = QLabel(self)
+        self.counter_label.setStyleSheet(
+            'font: bold 11px "幼圆", "YouYuan", "Segoe UI", "PingFang SC", sans-serif; '
+            'color: #B0A090; background: transparent; padding-top: 6px; padding-right: 6px;'
+        )
+        self.counter_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self.counter_label.setFixedWidth(36)
+        self.counter_label._base_font_size = 11
+        title_row.addWidget(self.counter_label)
+
+        main_layout.addWidget(title_container)
 
         # Separator line
         separator = QWidget(self)
@@ -112,11 +134,13 @@ class MainWindow(QWidget):
         tasks = self.db.get_all_tasks()
         for task in tasks:
             self._add_task_row(task)
+        self._update_counter(tasks)
 
     def _add_task_row(self, task):
         row = TaskRowWidget(task["id"], task["title"], task["completed"], task.get("created_at"))
         row.toggled.connect(self._on_task_toggled)
         row.deleted.connect(self._on_task_deleted)
+        row.edited.connect(self._on_task_edited)
         insert_index = self.list_layout.count() - 1
         self.list_layout.insertWidget(insert_index, row)
 
@@ -130,6 +154,15 @@ class MainWindow(QWidget):
         tasks = self.db.get_all_tasks()
         for task in tasks:
             self._add_task_row(task)
+        self._update_counter(tasks)
+
+    def _update_counter(self, tasks):
+        total = len(tasks)
+        pending = sum(1 for t in tasks if not t["completed"])
+        if total > 0:
+            self.counter_label.setText(f"{pending}/{total}")
+        else:
+            self.counter_label.setText("")
 
     def _show_input(self):
         self.input.show_input()
@@ -150,6 +183,10 @@ class MainWindow(QWidget):
 
     def _on_task_deleted(self, task_id):
         self.db.delete_task(task_id)
+        self._refresh_tasks()
+
+    def _on_task_edited(self, task_id, new_title):
+        self.db.update_task(task_id, new_title)
         self._refresh_tasks()
 
     def _restore_position(self):
@@ -251,6 +288,12 @@ class MainWindow(QWidget):
             w = item.widget()
             if isinstance(w, TaskRowWidget):
                 w.set_scale(scale)
+        # Counter label scale
+        cfs = max(9, round(self.counter_label._base_font_size * scale))
+        self.counter_label.setStyleSheet(
+            f'font: bold {cfs}px "幼圆", "YouYuan", "Segoe UI", "PingFang SC", sans-serif; '
+            'color: #B0A090; background: transparent; padding-top: 6px; padding-right: 6px;'
+        )
 
     # ---- Drag ----
 
