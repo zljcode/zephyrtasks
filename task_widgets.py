@@ -102,6 +102,7 @@ class DeleteButton(QLabel):
 class TaskRowWidget(QWidget):
     toggled = pyqtSignal(int)
     deleted = pyqtSignal(int)
+    edited = pyqtSignal(int, str)
 
     def __init__(self, task_id, title, completed, created_at=None, parent=None):
         super().__init__(parent)
@@ -126,6 +127,19 @@ class TaskRowWidget(QWidget):
         self.title_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
         self._update_title_style(completed)
         layout.addWidget(self.title_label)
+
+        # 编辑输入框（初始隐藏）
+        self._edit_input = QLineEdit()
+        self._edit_input.setVisible(False)
+        self._edit_input.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        self._edit_input.setStyleSheet(
+            'background: white; color: #3D3226; border: 1px solid #C87A5A; '
+            'border-radius: 4px; padding: 2px 6px; '
+            f'font: bold {self._BASE_FONT_SIZE}px "幼圆", "YouYuan", "Segoe UI", "PingFang SC", sans-serif;'
+        )
+        self._edit_input.returnPressed.connect(self._on_edit_done)
+        layout.addWidget(self._edit_input)
+        self._edit_input.installEventFilter(self)
 
         self.delete_btn = DeleteButton()
         self.delete_btn.clicked.connect(self._on_delete)
@@ -153,6 +167,12 @@ class TaskRowWidget(QWidget):
         fs = max(10, round(self._BASE_FONT_SIZE * scale))
         self.setFixedHeight(max(28, round(44 * scale)))
         self._update_title_style(bool(self.checkbox.isChecked()), fs)
+        edit_fs = max(10, round(self._BASE_FONT_SIZE * scale))
+        self._edit_input.setStyleSheet(
+            'background: white; color: #3D3226; border: 1px solid #C87A5A; '
+            'border-radius: 4px; padding: 2px 6px; '
+            f'font: bold {edit_fs}px "幼圆", "YouYuan", "Segoe UI", "PingFang SC", sans-serif;'
+        )
 
     def _on_toggle(self, state):
         completed = state == Qt.Checked
@@ -172,6 +192,31 @@ class TaskRowWidget(QWidget):
     def _on_delete(self):
         self.deleted.emit(self.task_id)
 
+    def mouseDoubleClickEvent(self, event):
+        """双击任务行文字进入编辑模式"""
+        if event.button() == Qt.LeftButton:
+            if event.pos().x() > 30:  # 排除复选框区域
+                self._enter_edit_mode()
+        super().mouseDoubleClickEvent(event)
+
+    def _enter_edit_mode(self):
+        self._edit_input.setText(self.title_label.text())
+        self._edit_input.setVisible(True)
+        self._edit_input.setFocus()
+        self._edit_input.selectAll()
+        self.title_label.setVisible(False)
+
+    def _exit_edit_mode(self, save):
+        if save:
+            new_title = self._edit_input.text().strip()
+            if new_title and new_title != self.title_label.text():
+                self.edited.emit(self.task_id, new_title)
+        self._edit_input.setVisible(False)
+        self.title_label.setVisible(True)
+
+    def _on_edit_done(self):
+        self._exit_edit_mode(True)
+
     def enterEvent(self, event):
         self.delete_btn.set_visible(True)
         super().enterEvent(event)
@@ -179,6 +224,14 @@ class TaskRowWidget(QWidget):
     def leaveEvent(self, event):
         self.delete_btn.set_visible(False)
         super().leaveEvent(event)
+
+    def eventFilter(self, obj, event):
+        from PyQt5.QtCore import QEvent
+        if obj == self._edit_input and event.type() == QEvent.KeyPress:
+            if event.key() == Qt.Key_Escape:
+                self._exit_edit_mode(False)
+                return True
+        return super().eventFilter(obj, event)
 
     def paintEvent(self, event):
         painter = QPainter(self)
